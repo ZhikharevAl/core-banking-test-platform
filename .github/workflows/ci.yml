@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+
+  test:
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v5.2.0
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Grant execute permission
+        run: chmod +x gradlew
+
+      - name: Run Checkstyle
+        run: ./gradlew checkstyleMain checkstyleTest
+
+      - name: Run Tests
+        run: ./gradlew test
+
+      - name: Upload Allure Results
+        uses: actions/upload-artifact@v7.0.1
+        if: always()
+        with:
+          name: allure-results
+          path: build/allure-results
