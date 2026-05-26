@@ -1,15 +1,14 @@
 repos:
 
-  # Базовые проверки файлов
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
     hooks:
 
       - id: trailing-whitespace
-        name: Trim Trailing Whitespace
+        name: Trim trailing whitespace
 
       - id: end-of-file-fixer
-        name: Fix End of Files
+        name: Fix end of files
 
       - id: check-yaml
         name: Check YAML files
@@ -22,7 +21,7 @@ repos:
 
       - id: check-added-large-files
         name: Check for large files
-        args: [ "--maxkb=1000" ]
+        args: ["--maxkb=1000"]
 
       - id: check-merge-conflict
         name: Check for merge conflicts
@@ -30,16 +29,13 @@ repos:
       - id: mixed-line-ending
         name: Check line endings
 
-  # Поиск секретов
   - repo: https://github.com/Yelp/detect-secrets
     rev: v1.5.0
     hooks:
 
       - id: detect-secrets
-        name: Detect Secrets
-        args: [ "--baseline", ".secrets.baseline" ]
+        name: Detect secrets
 
-  # Gradle Checkstyle
   - repo: local
     hooks:
 
@@ -49,12 +45,12 @@ repos:
         language: system
         pass_filenames: false
         files: \.java$
-        stages: [ pre-commit ]
+        stages: [pre-commit]
 
       - id: gradle-test
-        name: Gradle Unit Tests
+        name: Gradle unit tests
         entry: ./gradlew test
         language: system
         pass_filenames: false
         files: \.java$
-        stages: [ pre-commit ]
+        stages: [pre-commit]
