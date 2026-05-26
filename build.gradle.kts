@@ -1,7 +1,6 @@
 plugins {
-    id("java")
+    java
     checkstyle
-    id("io.qameta.allure") version "4.0.2"
 }
 
 group = "org.example"
@@ -11,12 +10,29 @@ repositories {
     mavenCentral()
 }
 
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+checkstyle {
+    toolVersion = "10.17.0"
+    configDirectory.set(file("config/checkstyle"))
+    isIgnoreFailures = false
+    maxWarnings = 0
+}
+
 dependencies {
-    testImplementation(platform("org.junit:junit-bom:5.10.0"))
+    testImplementation(platform("org.junit:junit-bom:5.10.2"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
 tasks.test {
     useJUnitPlatform()
+    testLogging {
+        events("passed", "failed", "skipped")
+        showStandardStreams = false
+    }
 }
