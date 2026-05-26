@@ -5,10 +5,15 @@ build/
 # IntelliJ
 .idea/
 *.iml
+out/
+
+# VS Code
+.vscode/
 
 # Allure
 allure-results/
 allure-report/
 
-# Secrets
-.secrets.baseline
+# OS noise
+.DS_Store
+Thumbs.db

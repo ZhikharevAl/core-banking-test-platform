@@ -16,10 +16,10 @@
 
     <module name="SuppressWarningsFilter"/>
 
-    <!-- Проверка на пустую строку в конце файла -->
+    <!-- Пустая строка в конце файла -->
     <module name="NewlineAtEndOfFile"/>
 
-    <!-- Проверка длины строки -->
+    <!-- Длина строки -->
     <module name="LineLength">
         <property name="fileExtensions" value="java"/>
         <property name="max" value="120"/>
@@ -27,25 +27,26 @@
                   value="^package.*|^import.*|href\s*=\s*&quot;[^&quot;]*&quot;|http://|https://|ftp://"/>
     </module>
 
-    <!-- Проверка на табы -->
+    <!-- Запрет на табы -->
     <module name="FileTabCharacter">
         <property name="eachLine" value="true"/>
     </module>
 
+    <!-- ВАЖНО: путь резолвится относительно директории конфига, не CWD.
+         Раньше было value="checkstyle-suppressions.xml" - это и валило CI. -->
     <module name="SuppressionFilter">
-        <property name="file" value="checkstyle-suppressions.xml"/>
+        <property name="file" value="${config_loc}/checkstyle-suppressions.xml"/>
         <property name="optional" value="true"/>
     </module>
 
-    <!-- TreeWalker для проверок на основе AST -->
     <module name="TreeWalker">
 
-        <!-- Тестовые методы должны заканчиваться на Test или Tests -->
+        <!-- Тестовые методы должны заканчиваться на Test или Tests.
+             XPath-запрос держим одной строкой - некоторые версии Saxon
+             ломаются на переносах внутри атрибута. -->
         <module name="MatchXpath">
             <property name="id" value="testMethodName"/>
-            <property name="query"
-                      value="//METHOD_DEF[./MODIFIERS/ANNOTATION//IDENT[@text='Test']]
-                            /IDENT[not(ends-with(@text, 'Test')) and not(ends-with(@text, 'Tests'))]"/>
+            <property name="query" value="//METHOD_DEF[./MODIFIERS/ANNOTATION//IDENT[@text='Test']]/IDENT[not(ends-with(@text, 'Test')) and not(ends-with(@text, 'Tests'))]"/>
             <message key="matchxpath.match"
                      value="Test method name must end with 'Test' or 'Tests'"/>
         </module>
@@ -53,9 +54,7 @@
         <!-- Тестовые классы должны заканчиваться на Tests -->
         <module name="MatchXpath">
             <property name="id" value="testClassName"/>
-            <property name="query"
-                      value="//CLASS_DEF[.//METHOD_DEF/MODIFIERS/ANNOTATION//IDENT[@text='Test']]
-                            /IDENT[not(ends-with(@text, 'Tests'))]"/>
+            <property name="query" value="//CLASS_DEF[.//METHOD_DEF/MODIFIERS/ANNOTATION//IDENT[@text='Test']]/IDENT[not(ends-with(@text, 'Tests'))]"/>
             <message key="matchxpath.match"
                      value="Test class name must end with 'Tests'"/>
         </module>
@@ -290,7 +289,6 @@
             <property name="allowSamelineMultipleAnnotations" value="true"/>
         </module>
 
-        <!-- Все методы начинаются с маленькой буквы -->
         <module name="MethodName">
             <property name="format" value="^[a-z][a-zA-Z0-9]*$"/>
             <message key="name.invalidPattern"
