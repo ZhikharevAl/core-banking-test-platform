@@ -8,6 +8,9 @@ import org.junit.platform.suite.api.IncludeEngines;
 import org.junit.platform.suite.api.SelectClasspathResource;
 import org.junit.platform.suite.api.Suite;
 
+/**
+ * Cucumber-сюита для Weather API.
+ */
 @Suite
 @IncludeEngines("cucumber")
 @SelectClasspathResource("features/weather")
@@ -16,5 +19,6 @@ import org.junit.platform.suite.api.Suite;
         key = PLUGIN_PROPERTY_NAME,
         value = "pretty,io.qameta.allure.cucumber7jvm.AllureCucumber7Jvm"
 )
-public class CucumberTestRunner {
+public class CucumberTestRunnerTests {
+
 }
