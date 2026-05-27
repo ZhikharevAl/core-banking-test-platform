@@ -89,7 +89,7 @@ jobs:
           path: gh-pages
         continue-on-error: true
 
-      - uses: simple-elf/allure-report-action@v1.9
+      - uses: simple-elf/allure-report-action@v1.12
         with:
           allure_results: allure-results
           gh_pages: gh-pages
