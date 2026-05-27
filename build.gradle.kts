@@ -45,6 +45,8 @@ dependencies {
     testImplementation("com.github.tomakehurst:wiremock-jre8-standalone:3.0.1")
     testImplementation("com.fasterxml.jackson.core:jackson-databind:2.21.2")
     testImplementation("io.qameta.allure:allure-cucumber7-jvm:2.32.0")
+
+    testRuntimeOnly("org.slf4j:slf4j-simple:2.0.13")
 }
 
 tasks.register("writeAllureEnvironment") {
