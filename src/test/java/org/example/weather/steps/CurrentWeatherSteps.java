@@ -12,6 +12,7 @@ import org.example.weather.api.WeatherApiClient;
 import org.example.weather.api.WeatherResponseParser;
 import org.example.weather.fixtures.CurrentWeatherFixture;
 import org.example.weather.model.CurrentWeatherResponse;
+import org.example.weather.support.Mismatches;
 import org.example.weather.support.WeatherTestContext;
 import org.example.weather.wiremock.WeatherStubs;
 
@@ -58,6 +59,10 @@ public class CurrentWeatherSteps {
                         + "tempC=" + parsed.current().tempC()
                         + ", humidity=" + parsed.current().humidity()
                         + ", condition=" + parsed.current().condition().text());
+
+                Mismatches.report(row.city(), "tempC", row.tempC(), parsed.current().tempC());
+                Mismatches.report(row.city(), "humidity", row.humidity(), parsed.current().humidity());
+                Mismatches.report(row.city(), "condition", row.condition(), parsed.current().condition().text());
 
                 softly.assertThat(result.statusCode())
                         .as("HTTP status for %s", row.city())

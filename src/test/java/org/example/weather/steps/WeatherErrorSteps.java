@@ -14,11 +14,12 @@ import org.example.weather.fixtures.ApiErrorFixture;
 import org.example.weather.fixtures.ErrorRequestCase;
 import org.example.weather.fixtures.ExpectedApiError;
 import org.example.weather.model.ApiError;
+import org.example.weather.support.Mismatches;
 import org.example.weather.support.WeatherTestContext;
 import org.example.weather.wiremock.WeatherStubs;
 
 /**
- * Степы для негативных сценариев. Одинаково покрывают 400 / 401 / 403
+ * Степы для негативных сценариев. Одинаково покрывают 400 / 401 / 403.
  */
 public class WeatherErrorSteps {
 
@@ -60,6 +61,10 @@ public class WeatherErrorSteps {
 
                 Allure.step("Verify error " + code + ": status="
                         + result.statusCode() + ", message='" + parsed.message() + "'");
+
+                Mismatches.report(code, "httpStatus", row.httpStatus(), result.statusCode());
+                Mismatches.report(code, "errorCode", row.errorCode(), parsed.code());
+                Mismatches.report(code, "errorMessage", row.errorMessage(), parsed.message());
 
                 softly.assertThat(result.statusCode())
                         .as("HTTP status for error %s", code)
