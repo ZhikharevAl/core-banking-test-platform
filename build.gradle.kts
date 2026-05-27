@@ -47,7 +47,36 @@ dependencies {
     testImplementation("io.qameta.allure:allure-cucumber7-jvm:2.32.0")
 }
 
+tasks.register("writeAllureEnvironment") {
+    val outputFile = layout.buildDirectory.file("allure-results/environment.properties")
+    outputs.file(outputFile)
+    doLast {
+        val file = outputFile.get().asFile
+        file.parentFile.mkdirs()
+        file.writeText(
+            """
+            Project=core-banking-test-platform
+            Module=weather-api-tests
+            Java.Version=${System.getProperty("java.version")}
+            Gradle.Version=${gradle.gradleVersion}
+            OS=${System.getProperty("os.name")} ${System.getProperty("os.version")}
+            Cucumber=7.34.3
+            WireMock=3.0.1
+            AssertJ=3.26.3
+            Allure=2.32.0
+            Jackson=2.21.2
+            """.trimIndent()
+        )
+    }
+}
+
+tasks.register<Copy>("copyAllureCategories") {
+    from("src/test/resources/allure/categories.json")
+    into(layout.buildDirectory.dir("allure-results"))
+}
+
 tasks.test {
+    dependsOn("writeAllureEnvironment", "copyAllureCategories")
     useJUnitPlatform()
 
     testLogging {
