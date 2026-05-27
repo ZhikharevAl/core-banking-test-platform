@@ -33,6 +33,12 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter")
     testImplementation("org.junit.jupiter:junit-jupiter-params")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    testImplementation("org.junit.platform:junit-platform-suite-engine")
+    testImplementation("io.cucumber:cucumber-java:7.34.3")
+    testImplementation("io.cucumber:cucumber-junit-platform-engine:7.34.3")
+    testImplementation("com.github.tomakehurst:wiremock-jre8-standalone:3.0.1")
+    testImplementation("com.fasterxml.jackson.core:jackson-databind:2.21.2")
+    testImplementation("io.qameta.allure:allure-cucumber7-jvm:2.32.0")
 }
 
 tasks.test {
@@ -42,6 +48,8 @@ tasks.test {
         events("passed", "failed", "skipped")
         showStandardStreams = false
     }
+
+    systemProperty("cucumber.junit-platform.naming-strategy", "long")
 
     finalizedBy(tasks.jacocoTestReport)
 }
