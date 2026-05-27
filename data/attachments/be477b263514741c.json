@@ -1,0 +1,14 @@
+Status: 200
+
+{
+  "location" : {
+    "name" : "Paris"
+  },
+  "current" : {
+    "temp_c" : 19.3,
+    "humidity" : 71,
+    "condition" : {
+      "text" : "Overcast"
+    }
+  }
+}

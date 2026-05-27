@@ -1,0 +1,1 @@
+{"total":2,"items":[{"uid":"53dabd42e10f6f2e1ad56ba9da4b26ef","name":"Current weather endpoint - happy path","statistic":{"failed":0,"broken":0,"skipped":0,"passed":1,"unknown":0,"total":1}},{"uid":"e336d2930c131518e7bb36e7aa9a77ed","name":"Current weather endpoint - error responses","statistic":{"failed":0,"broken":0,"skipped":0,"passed":1,"unknown":0,"total":1}}]}

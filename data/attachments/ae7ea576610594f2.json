@@ -1,0 +1,6 @@
+Status: 400
+
+{
+  "code" : 1006,
+  "message" : "No location found matching parameter 'q'"
+}

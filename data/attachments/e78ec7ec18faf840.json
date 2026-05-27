@@ -1,0 +1,14 @@
+Status: 200
+
+{
+  "location" : {
+    "name" : "Moscow"
+  },
+  "current" : {
+    "temp_c" : 17.5,
+    "humidity" : 66,
+    "condition" : {
+      "text" : "Clear"
+    }
+  }
+}

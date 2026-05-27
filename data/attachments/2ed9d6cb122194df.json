@@ -1,0 +1,14 @@
+Status: 200
+
+{
+  "location" : {
+    "name" : "Berlin"
+  },
+  "current" : {
+    "temp_c" : 21.1,
+    "humidity" : 58,
+    "condition" : {
+      "text" : "Sunny"
+    }
+  }
+}

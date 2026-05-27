@@ -1,0 +1,9 @@
+city	code
+bad-city	1006
+empty-q	1003
+bad-url	1005
+no-key	1002
+invalid-key	2006
+quota-out	2007
+key-disabled	2008
+no-access	2009

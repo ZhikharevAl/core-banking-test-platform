@@ -1,0 +1,6 @@
+Status: 401
+
+{
+  "code" : 1002,
+  "message" : "API key not provided"
+}

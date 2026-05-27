@@ -1,0 +1,14 @@
+Status: 200
+
+{
+  "location" : {
+    "name" : "Tokyo"
+  },
+  "current" : {
+    "temp_c" : 24.0,
+    "humidity" : 74,
+    "condition" : {
+      "text" : "Mist"
+    }
+  }
+}

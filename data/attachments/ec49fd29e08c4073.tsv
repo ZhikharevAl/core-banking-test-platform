@@ -1,0 +1,9 @@
+status	code	message
+400	1006	No location found matching parameter 'q'
+400	1003	Parameter 'q' not provided.
+400	1005	API request url is invalid.
+401	1002	API key not provided
+401	2006	API key provided is invalid
+403	2007	API key has exceeded calls per month quota.
+403	2008	API key has been disabled.
+403	2009	API key does not have access to the resource.

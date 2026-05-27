@@ -1,0 +1,6 @@
+Status: 401
+
+{
+  "code" : 2006,
+  "message" : "API key provided is invalid"
+}
