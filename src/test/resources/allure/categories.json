@@ -1,0 +1,50 @@
+[
+  {
+    "name": "Infrastructure - WireMock",
+    "matchedStatuses": ["broken"],
+    "messageRegex": "(?s).*(WireMockServer is not started|Address already in use|java\\.net\\.BindException|Failed to bind|Could not start WireMock).*",
+    "traceRegex":   "(?s).*(WireMockServer is not started|Address already in use|java\\.net\\.BindException|Failed to bind|Could not start WireMock).*"
+  },
+  {
+    "name": "Infrastructure - HTTP transport",
+    "matchedStatuses": ["broken", "failed"],
+    "messageRegex": "(?s).*(ConnectException|SocketTimeoutException|UnknownHostException|HTTP call failed|HTTP call interrupted|Connection refused|Connection timed out).*",
+    "traceRegex":   "(?s).*(ConnectException|SocketTimeoutException|UnknownHostException|HTTP call failed|HTTP call interrupted|Connection refused|Connection timed out).*"
+  },
+  {
+    "name": "API - Serialization / mapping",
+    "matchedStatuses": ["broken", "failed"],
+    "messageRegex": "(?s).*(JsonProcessingException|JsonMappingException|MismatchedInputException|InvalidFormatException|Failed to parse response body|Cannot deserialize|Cannot construct instance).*",
+    "traceRegex":   "(?s).*(JsonProcessingException|JsonMappingException|MismatchedInputException|InvalidFormatException|Failed to parse response body|Cannot deserialize|Cannot construct instance).*"
+  },
+  {
+    "name": "API - HTTP server error 5xx",
+    "matchedStatuses": ["failed"],
+    "messageRegex": "(?s).*(expected:?\\s*<?(200|400|401|403|404)>?\\s*but was:?\\s*<?5[0-9]{2}>?|HTTP status .* 5[0-9]{2}|Internal Server Error).*",
+    "traceRegex":   "(?s).*(expected:?\\s*<?(200|400|401|403|404)>?\\s*but was:?\\s*<?5[0-9]{2}>?|HTTP status .* 5[0-9]{2}|Internal Server Error).*"
+  },
+  {
+    "name": "API - HTTP client error 4xx (unexpected)",
+    "matchedStatuses": ["failed"],
+    "messageRegex": "(?s).*(expected:?\\s*<?200>?\\s*but was:?\\s*<?(400|401|403|404|409)>?).*",
+    "traceRegex":   "(?s).*(expected:?\\s*<?200>?\\s*but was:?\\s*<?(400|401|403|404|409)>?).*"
+  },
+  {
+    "name": "Cucumber - glue / step definition",
+    "matchedStatuses": ["broken"],
+    "messageRegex": "(?s).*(DuplicateStepDefinitionException|UndefinedStepException|AmbiguousStepDefinitionsException|CucumberException|No backend could load).*",
+    "traceRegex":   "(?s).*(DuplicateStepDefinitionException|UndefinedStepException|AmbiguousStepDefinitionsException|CucumberException|No backend could load).*"
+  },
+  {
+    "name": "Test data - Null / missing value",
+    "matchedStatuses": ["broken", "failed"],
+    "messageRegex": "(?s).*(NullPointerException|Cannot invoke .* because .* is null|No recorded call for|No value present).*",
+    "traceRegex":   "(?s).*(NullPointerException|Cannot invoke .* because .* is null|No recorded call for|No value present).*"
+  },
+  {
+    "name": "Assertion error (Bug)",
+    "matchedStatuses": ["failed"],
+    "messageRegex": "(?s).*(AssertionError|AssertionFailedError|Multiple Failures|Expecting actual:|Expecting .* to be equal to|expected: .* but was:).*",
+    "traceRegex":   "(?s).*(AssertionError|AssertionFailedError|Multiple Failures|Expecting actual:|Expecting .* to be equal to|expected: .* but was:).*"
+  }
+]
