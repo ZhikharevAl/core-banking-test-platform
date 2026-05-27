@@ -55,4 +55,5 @@ public final class CreditCard extends AbstractCardProduct {
     public BigDecimal interestRate() {
         return interestRate;
     }
+
 }

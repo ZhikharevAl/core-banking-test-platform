@@ -4,10 +4,17 @@ on:
   push:
   pull_request:
 
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
 jobs:
 
   build:
-    name: Checkstyle and tests
+    name: Checkstyle, tests, coverage
     runs-on: ubuntu-latest
 
     steps:
@@ -20,7 +27,11 @@ jobs:
         with:
           distribution: temurin
           java-version: 21
-          cache: gradle
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
 
       - name: Make gradlew executable
         run: chmod +x gradlew
@@ -28,14 +39,22 @@ jobs:
       - name: Run Checkstyle
         run: ./gradlew checkstyleMain checkstyleTest --no-daemon --stacktrace
 
-      - name: Run unit tests
-        run: ./gradlew test --no-daemon --stacktrace
+      - name: Run tests with coverage
+        run: ./gradlew test jacocoTestReport --no-daemon --stacktrace
 
-      - name: Upload test reports on failure
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: jacoco-html
+          path: build/reports/jacoco/test/html/
+          retention-days: 14
+
+      - name: Upload reports on failure
         if: failure()
         uses: actions/upload-artifact@v7.0.1
         with:
-          name: test-reports
+          name: reports
           path: |
             build/reports/tests/
             build/reports/checkstyle/

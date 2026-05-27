@@ -12,7 +12,7 @@ public abstract class AbstractBankingProduct implements BankingProduct {
 
     protected AbstractBankingProduct(final String name, final CurrencyCode currency, final BigDecimal openingBalance) {
         validateAmount(openingBalance, "openingBalance");
-        this.name = requireNotBlank(name);
+        this.name = requireNotBlank(name, "name");
         this.currency = requireNonNull(currency, "currency");
         this.balance = openingBalance;
     }
@@ -52,10 +52,10 @@ public abstract class AbstractBankingProduct implements BankingProduct {
         }
     }
 
-    protected static String requireNotBlank(final String value) {
-        requireNonNull(value, "name");
+    protected static String requireNotBlank(final String value, final String field) {
+        requireNonNull(value, field);
         if (value.isBlank()) {
-            throw new IllegalArgumentException("name" + " must not be blank");
+            throw new IllegalArgumentException(field + " must not be blank");
         }
         return value;
     }
@@ -66,4 +66,5 @@ public abstract class AbstractBankingProduct implements BankingProduct {
         }
         return value;
     }
+
 }

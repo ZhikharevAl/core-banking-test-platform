@@ -14,4 +14,5 @@ public final class ForeignCurrencyDebitCard extends AbstractCardProduct {
             throw new IllegalArgumentException("Foreign currency card cannot be in RUB");
         }
     }
+
 }
