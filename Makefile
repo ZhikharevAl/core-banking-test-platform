@@ -1,7 +1,9 @@
 GRADLE := ./gradlew
 GRADLE_FLAGS := --no-daemon --stacktrace
+COMPOSE := docker compose
 
-.PHONY: help build test check coverage open-coverage clean ci precommit-install precommit-run
+.PHONY: help build test check coverage open-coverage clean ci precommit-install precommit-run \
+        allure-serve allure-clean docker-test docker-allure docker-down docker-clean
 
 help: ## Показать список команд
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
@@ -10,7 +12,7 @@ help: ## Показать список команд
 build: ## Скомпилировать проект (без тестов)
 	$(GRADLE) build -x test $(GRADLE_FLAGS)
 
-test: ## Прогнать unit-тесты
+test: ## Прогнать тесты
 	$(GRADLE) test $(GRADLE_FLAGS)
 
 check: ## Запустить Checkstyle
@@ -30,6 +32,26 @@ ci: check test coverage ## Полный набор проверок (как в C
 
 clean: ## Очистить артефакты сборки
 	$(GRADLE) clean $(GRADLE_FLAGS)
+
+
+allure-serve: ## Поднять Allure UI локально на http://localhost:5050
+	$(COMPOSE) up -d allure
+	@echo "Allure UI: http://localhost:5050"
+
+allure-clean: ## Очистить allure-results
+	rm -rf build/allure-results
+
+
+docker-test: ## Прогнать CI-набор в Docker (checkstyle + test + jacoco)
+	HOST_UID=$(shell id -u) HOST_GID=$(shell id -g) $(COMPOSE) run --rm --build tests
+
+docker-allure: docker-test allure-serve ## Тесты в Docker + Allure UI
+
+docker-down: ## Погасить compose-стек
+	$(COMPOSE) down
+
+docker-clean: ## Снести образы, volumes и сетевые ресурсы compose-стека
+	$(COMPOSE) down -v --rmi local
 
 precommit-install: ## Установить pre-commit хуки
 	pre-commit install
