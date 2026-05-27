@@ -11,4 +11,5 @@ public interface BankingProduct {
     CurrencyCode currency();
 
     BigDecimal balance();
+
 }

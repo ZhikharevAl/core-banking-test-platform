@@ -8,4 +8,5 @@ public final class DebitCard extends AbstractCardProduct {
     public DebitCard(final String name, final CurrencyCode currency, final BigDecimal openingBalance) {
         super(name, currency, openingBalance);
     }
+
 }

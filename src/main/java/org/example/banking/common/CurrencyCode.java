@@ -6,5 +6,6 @@ package org.example.banking.common;
 public enum CurrencyCode {
     RUB,
     USD,
-    EUR
+    EUR,
+
 }

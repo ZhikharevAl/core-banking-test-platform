@@ -27,4 +27,5 @@ public abstract class AbstractCardProduct extends AbstractBankingProduct impleme
     public BigDecimal currentBalance() {
         return balance();
     }
+
 }

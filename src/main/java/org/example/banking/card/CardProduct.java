@@ -9,4 +9,5 @@ public interface CardProduct extends BankingProduct {
     void withdraw(BigDecimal amount);
 
     BigDecimal currentBalance();
+
 }
