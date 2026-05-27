@@ -48,7 +48,7 @@ repos:
         stages: [pre-commit]
 
       - id: gradle-test
-        name: Gradle unit tests
+        name: Gradle tests
         entry: ./gradlew test
         language: system
         pass_filenames: false
