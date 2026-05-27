@@ -35,6 +35,8 @@ dependencies {
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testImplementation("org.junit.platform:junit-platform-suite-engine")
 
+    testImplementation("org.assertj:assertj-core:3.26.3")
+
     testImplementation("io.cucumber:cucumber-java:7.34.3")
     testImplementation("io.cucumber:cucumber-junit-platform-engine:7.34.3")
 
