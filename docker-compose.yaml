@@ -1,0 +1,47 @@
+services:
+
+  tests:
+    build:
+      context: .
+    image: core-banking-test-platform:tests
+    user: "${HOST_UID:-1000}:${HOST_GID:-1000}"
+    environment:
+      GRADLE_OPTS: "-Dorg.gradle.daemon=false"
+    command: >
+      gradle --no-daemon --stacktrace
+      checkstyleMain checkstyleTest test jacocoTestReport
+    volumes:
+      - ./build:/workspace/build
+      - gradle-cache:/home/gradle/.gradle
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: "2.0"
+
+  allure:
+    image: frankescobar/allure-docker-service:2.27.0
+    environment:
+      CHECK_RESULTS_EVERY_SECONDS: "3"
+      KEEP_HISTORY: "1"
+      KEEP_HISTORY_LATEST: "25"
+    ports:
+      - "5050:5050"
+    volumes:
+      - ./build/allure-results:/app/allure-results
+      - allure-history:/app/default-reports
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:5050/allure-docker-service/version || exit 1"]
+      interval: 15s
+      timeout: 3s
+      retries: 5
+      start_period: 20s
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: "0.5"
+
+volumes:
+  gradle-cache:
+  allure-history:
