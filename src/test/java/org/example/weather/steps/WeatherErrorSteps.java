@@ -37,12 +37,12 @@ public class WeatherErrorSteps {
         this.context = context;
     }
 
-    @Given("mock weather service returns error responses")
+    @Given("mock-сервис погоды возвращает ответы с ошибками")
     public void mockWeatherServiceReturnsErrorResponses(final List<ApiErrorFixture> fixtures) {
         fixtures.forEach(stubs::stubCurrentError);
     }
 
-    @When("I request weather with invalid input cities")
+    @When("я запрашиваю погоду для некорректных входных данных")
     public void requestWeatherWithInvalidInputCities(final List<ErrorRequestCase> cases) {
         for (ErrorRequestCase requestCase : cases) {
             final ApiCallResult result = client.getCurrent(
@@ -51,7 +51,7 @@ public class WeatherErrorSteps {
         }
     }
 
-    @Then("error response matches expected api errors")
+    @Then("ответ с ошибкой совпадает с ожидаемым")
     public void errorResponseMatchesExpectedApiErrors(final List<ExpectedApiError> expected) {
         SoftAssertions.assertSoftly(softly -> {
             for (ExpectedApiError row : expected) {

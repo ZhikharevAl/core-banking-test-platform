@@ -6,11 +6,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Логирование расхождений «ожидаемое vs фактическое» в stdout-лог.
- * Шаги вызывают этот хелпер рядом с AssertJ-проверками, чтобы выполнить
- * требование ТЗ вывести расхождения по каждому значению в лог.
- * <p>
- * key - произвольный идентификатор сравниваемого случая (имя города,
- * код ошибки и т.п.), попадающий в префикс строки для контекста.
  */
 public final class Mismatches {
 
@@ -19,15 +14,20 @@ public final class Mismatches {
     private Mismatches() {
     }
 
-    public static void report(
+    /**
+     * Сравнивает ожидаемое и фактическое значение, при расхождении пишет WARN в лог.
+     */
+    public static boolean report(
             final String key,
             final String field,
             final Object expected,
             final Object actual
     ) {
-        if (!Objects.equals(expected, actual)) {
-            log.warn("[{}] {} mismatch: expected={}, actual={}", key, field, expected, actual);
+        if (Objects.equals(expected, actual)) {
+            return false;
         }
+        log.warn("[{}] {} mismatch: expected={}, actual={}", key, field, expected, actual);
+        return true;
     }
 
 }
