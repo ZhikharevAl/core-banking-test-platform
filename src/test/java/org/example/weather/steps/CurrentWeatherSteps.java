@@ -4,7 +4,9 @@ import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import io.qameta.allure.Allure;
+import java.util.ArrayList;
 import java.util.List;
+import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
 import org.example.weather.api.ApiCallResult;
 import org.example.weather.api.CurrentWeatherRequest;
@@ -35,12 +37,12 @@ public class CurrentWeatherSteps {
         this.context = context;
     }
 
-    @Given("mock weather service has valid responses for cities")
+    @Given("mock-сервис погоды содержит корректные ответы для городов")
     public void mockWeatherServiceHasValidResponsesForCities(final List<CurrentWeatherFixture> fixtures) {
         fixtures.forEach(stubs::stubCurrentSuccess);
     }
 
-    @When("I request current weather for cities")
+    @When("я запрашиваю текущую погоду для городов")
     public void requestCurrentWeatherForCities(final List<String> cities) {
         for (String city : cities) {
             final ApiCallResult result = client.getCurrent(CurrentWeatherRequest.forCity(city));
@@ -48,7 +50,7 @@ public class CurrentWeatherSteps {
         }
     }
 
-    @Then("weather response matches expected values")
+    @Then("значения ответа совпадают с ожидаемыми")
     public void weatherResponseMatchesExpectedValues(final List<CurrentWeatherFixture> expected) {
         SoftAssertions.assertSoftly(softly -> {
             for (CurrentWeatherFixture row : expected) {
@@ -78,6 +80,28 @@ public class CurrentWeatherSteps {
                         .isEqualTo(row.condition());
             }
         });
+    }
+
+    @Then("расхождения с ожидаемыми значениями зафиксированы в логе")
+    public void mismatchesAreRecordedInLog(final List<CurrentWeatherFixture> expected) {
+        final List<String> mismatches = new ArrayList<>();
+        for (CurrentWeatherFixture row : expected) {
+            final ApiCallResult result = context.callByCity(row.city());
+            final CurrentWeatherResponse parsed = WeatherResponseParser.parseCurrent(result);
+
+            if (Mismatches.report(row.city(), "tempC", row.tempC(), parsed.current().tempC())) {
+                mismatches.add(row.city() + ".tempC");
+            }
+            if (Mismatches.report(row.city(), "humidity", row.humidity(), parsed.current().humidity())) {
+                mismatches.add(row.city() + ".humidity");
+            }
+            if (Mismatches.report(row.city(), "condition", row.condition(), parsed.current().condition().text())) {
+                mismatches.add(row.city() + ".condition");
+            }
+        }
+        Assertions.assertThat(mismatches)
+                .as("Ожидались зафиксированные расхождения по значениям")
+                .isNotEmpty();
     }
 
 }

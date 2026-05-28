@@ -6,6 +6,7 @@ import java.math.BigDecimal;
  * Базовая реализация общей части банковских продуктов.
  */
 public abstract class AbstractBankingProduct implements BankingProduct {
+
     private final String name;
     private final CurrencyCode currency;
     private BigDecimal balance;

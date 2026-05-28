@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import org.example.banking.common.CurrencyCode;
 
 public final class CreditCard extends AbstractCardProduct {
+
     private final BigDecimal interestRate;
     private BigDecimal debt;
 

@@ -1,11 +1,10 @@
 package org.example.banking;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.math.BigDecimal;
 import java.util.List;
+import org.assertj.core.api.SoftAssertions;
 import org.example.banking.card.CardProduct;
 import org.example.banking.card.CreditCard;
 import org.example.banking.card.DebitCard;
@@ -27,10 +26,20 @@ class BankingProductArchitectureTests {
                 new Deposit("Savings", CurrencyCode.EUR, new BigDecimal("5000"))
         );
 
-        assertEquals(4, products.size());
-        assertTrue(products.stream().allMatch(p -> p.name() != null && !p.name().isBlank()));
-        assertTrue(products.stream().allMatch(p -> p.currency() != null));
-        assertTrue(products.stream().allMatch(p -> p.balance().signum() >= 0));
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(products)
+                    .as("products count")
+                    .hasSize(4);
+            softly.assertThat(products)
+                    .as("each product exposes a non-blank name")
+                    .allMatch(p -> p.name() != null && !p.name().isBlank());
+            softly.assertThat(products)
+                    .as("each product exposes a currency")
+                    .allMatch(p -> p.currency() != null);
+            softly.assertThat(products)
+                    .as("each product has a non-negative balance")
+                    .allMatch(p -> p.balance().signum() >= 0);
+        });
     }
 
     @Test
@@ -41,27 +50,33 @@ class BankingProductArchitectureTests {
                 new CreditCard("C", CurrencyCode.RUB, BigDecimal.TEN, new BigDecimal("0.1"))
         );
 
-        for (final CardProduct card : cards) {
-            card.topUp(BigDecimal.ONE);
-            card.withdraw(BigDecimal.ONE);
-            assertEquals(BigDecimal.TEN, card.currentBalance());
-        }
+        SoftAssertions.assertSoftly(softly -> {
+            for (final CardProduct card : cards) {
+                card.topUp(BigDecimal.ONE);
+                card.withdraw(BigDecimal.ONE);
+                softly.assertThat(card.currentBalance())
+                        .as("balance of %s after topUp+withdraw", card.name())
+                        .isEqualTo(BigDecimal.TEN);
+            }
+        });
     }
 
     @Test
     void creditCardIsRecognizableAsCardAndProductTest() {
         final BankingProduct product = new CreditCard("Typed", CurrencyCode.RUB, BigDecimal.TEN, new BigDecimal("0.1"));
 
-        assertInstanceOf(CardProduct.class, product);
-        assertInstanceOf(CreditCard.class, product);
+        assertThat(product)
+                .isInstanceOf(CardProduct.class)
+                .isInstanceOf(CreditCard.class);
     }
 
     @Test
     void depositIsRecognizableAsDepositProductAndBankingProductTest() {
         final BankingProduct product = new Deposit("Savings", CurrencyCode.EUR, BigDecimal.TEN);
 
-        assertInstanceOf(DepositProduct.class, product);
-        assertInstanceOf(Deposit.class, product);
+        assertThat(product)
+                .isInstanceOf(DepositProduct.class)
+                .isInstanceOf(Deposit.class);
     }
 
 }

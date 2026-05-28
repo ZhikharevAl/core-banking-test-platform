@@ -1,9 +1,10 @@
 package org.example.banking.card;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.math.BigDecimal;
+import org.assertj.core.api.SoftAssertions;
 import org.example.banking.common.CurrencyCode;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -16,16 +17,20 @@ class ForeignCurrencyDebitCardTests {
     void canBeOpenedInForeignCurrencyTest(final CurrencyCode currency) {
         final ForeignCurrencyDebitCard card = new ForeignCurrencyDebitCard("Travel", currency, new BigDecimal("100"));
 
-        assertEquals(currency, card.currency());
-        assertEquals(new BigDecimal("100"), card.currentBalance());
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(card.currency())
+                    .as("currency")
+                    .isEqualTo(currency);
+            softly.assertThat(card.currentBalance())
+                    .as("balance")
+                    .isEqualTo(new BigDecimal("100"));
+        });
     }
 
     @Test
     void rejectsRubCurrencyTest() {
-        assertThrows(
-                IllegalArgumentException.class,
-                () -> new ForeignCurrencyDebitCard("Bad", CurrencyCode.RUB, BigDecimal.TEN)
-        );
+        assertThatThrownBy(() -> new ForeignCurrencyDebitCard("Bad", CurrencyCode.RUB, BigDecimal.TEN))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
@@ -35,7 +40,9 @@ class ForeignCurrencyDebitCardTests {
         card.topUp(new BigDecimal("200"));
         card.withdraw(new BigDecimal("50"));
 
-        assertEquals(new BigDecimal("150"), card.currentBalance());
+        assertThat(card.currentBalance())
+                .as("balance")
+                .isEqualTo(new BigDecimal("150"));
     }
 
 }
