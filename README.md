@@ -1,7 +1,18 @@
 # core-banking-test-platform
 
 [![CI](https://github.com/ZhikharevAl/core-banking-test-platform/actions/workflows/ci.yml/badge.svg)](https://github.com/ZhikharevAl/core-banking-test-platform/actions/workflows/ci.yml)
-[![Allure Report](https://img.shields.io/badge/Allure-Report-orange)](https://ZhikharevAl.github.io/core-banking-test-platform/)
+[![Allure Report](https://img.shields.io/badge/Allure-Report-blue)](https://ZhikharevAl.github.io/core-banking-test-platform/)
+
+![Java](https://img.shields.io/badge/Java-21-007396?logo=openjdk&logoColor=white)
+![Gradle](https://img.shields.io/badge/Gradle-8.7-02303A?logo=gradle&logoColor=white)
+![JUnit5](https://img.shields.io/badge/JUnit-5-25A162?logo=junit5&logoColor=white)
+![Cucumber](https://img.shields.io/badge/Cucumber-7-23D96C?logo=cucumber&logoColor=white)
+![WireMock](https://img.shields.io/badge/WireMock-3-FF6B35?logo=wiremock&logoColor=white)
+![AssertJ](https://img.shields.io/badge/AssertJ-3.26-DD0031)
+![Allure](https://img.shields.io/badge/Allure-2.42-FF7B00?logo=qameta&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)
+![Checkstyle](https://img.shields.io/badge/Checkstyle-10.17-purple)
+![License](https://img.shields.io/badge/license-MIT-green)
 
 Тестовая платформа из двух модулей:
 
