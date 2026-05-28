@@ -1,1 +1,0 @@
-GET http://localhost:37939/v1/current.json?key=test-api-key&q=Paris
