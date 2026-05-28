@@ -1,0 +1,30 @@
+# Version control
+.git
+.gitattributes
+.gitignore
+
+# CI / hooks (не нужны внутри образа)
+.github
+.pre-commit-config.yaml
+
+# Build artifacts
+build
+.gradle
+out
+
+# IDE
+.idea
+.vscode
+*.iml
+
+# Allure / отчёты
+allure-results
+allure-report
+
+# Docs / картинки — для сборки тестов не нужны
+README.md
+attachments
+
+# OS noise
+.DS_Store
+Thumbs.db
