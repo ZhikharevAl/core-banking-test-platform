@@ -1,7 +1,7 @@
 package org.example.banking.common;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.math.BigDecimal;
 import org.example.banking.card.DebitCard;
@@ -11,73 +11,61 @@ class AbstractBankingProductValidationTests {
 
     @Test
     void nullNameIsRejectedTest() {
-        final IllegalArgumentException ex = assertThrows(
-                IllegalArgumentException.class,
-                () -> new DebitCard(null, CurrencyCode.RUB, BigDecimal.ZERO)
-        );
-        assertEquals("name must not be null", ex.getMessage());
+        assertThatThrownBy(() -> new DebitCard(null, CurrencyCode.RUB, BigDecimal.ZERO))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("name must not be null");
     }
 
     @Test
     void blankNameIsRejectedTest() {
-        final IllegalArgumentException ex = assertThrows(
-                IllegalArgumentException.class,
-                () -> new DebitCard("   ", CurrencyCode.RUB, BigDecimal.ZERO)
-        );
-        assertEquals("name must not be blank", ex.getMessage());
+        assertThatThrownBy(() -> new DebitCard("   ", CurrencyCode.RUB, BigDecimal.ZERO))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("name must not be blank");
     }
 
     @Test
     void emptyNameIsRejectedTest() {
-        assertThrows(
-                IllegalArgumentException.class,
-                () -> new DebitCard("", CurrencyCode.RUB, BigDecimal.ZERO)
-        );
+        assertThatThrownBy(() -> new DebitCard("", CurrencyCode.RUB, BigDecimal.ZERO))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
     void nullCurrencyIsRejectedTest() {
-        final IllegalArgumentException ex = assertThrows(
-                IllegalArgumentException.class,
-                () -> new DebitCard("Card", null, BigDecimal.ZERO)
-        );
-        assertEquals("currency must not be null", ex.getMessage());
+        assertThatThrownBy(() -> new DebitCard("Card", null, BigDecimal.ZERO))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("currency must not be null");
     }
 
     @Test
     void nullOpeningBalanceIsRejectedTest() {
-        final IllegalArgumentException ex = assertThrows(
-                IllegalArgumentException.class,
-                () -> new DebitCard("Card", CurrencyCode.RUB, null)
-        );
-        assertEquals("openingBalance must not be null", ex.getMessage());
+        assertThatThrownBy(() -> new DebitCard("Card", CurrencyCode.RUB, null))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("openingBalance must not be null");
     }
 
     @Test
     void negativeOpeningBalanceIsRejectedTest() {
-        final IllegalArgumentException ex = assertThrows(
-                IllegalArgumentException.class,
-                () -> new DebitCard("Card", CurrencyCode.RUB, new BigDecimal("-1"))
-        );
-        assertEquals("openingBalance must be >= 0", ex.getMessage());
+        assertThatThrownBy(() -> new DebitCard("Card", CurrencyCode.RUB, new BigDecimal("-1")))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("openingBalance must be >= 0");
     }
 
     @Test
     void zeroOpeningBalanceIsAcceptedTest() {
         final DebitCard card = new DebitCard("Card", CurrencyCode.RUB, BigDecimal.ZERO);
 
-        assertEquals(BigDecimal.ZERO, card.currentBalance());
+        assertThat(card.currentBalance())
+                .as("balance")
+                .isEqualTo(BigDecimal.ZERO);
     }
 
     @Test
     void insufficientFundsOnWithdrawTest() {
         final DebitCard card = new DebitCard("Card", CurrencyCode.RUB, new BigDecimal("10"));
 
-        final IllegalArgumentException ex = assertThrows(
-                IllegalArgumentException.class,
-                () -> card.withdraw(new BigDecimal("11"))
-        );
-        assertEquals("Insufficient funds", ex.getMessage());
+        assertThatThrownBy(() -> card.withdraw(new BigDecimal("11")))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Insufficient funds");
     }
 
     @Test
@@ -86,7 +74,9 @@ class AbstractBankingProductValidationTests {
 
         card.withdraw(new BigDecimal("10"));
 
-        assertEquals(BigDecimal.ZERO, card.currentBalance());
+        assertThat(card.currentBalance())
+                .as("balance")
+                .isEqualTo(BigDecimal.ZERO);
     }
 
 }

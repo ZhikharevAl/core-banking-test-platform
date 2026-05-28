@@ -1,9 +1,10 @@
 package org.example.banking.card;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.math.BigDecimal;
+import org.assertj.core.api.SoftAssertions;
 import org.example.banking.common.CurrencyCode;
 import org.junit.jupiter.api.Test;
 
@@ -17,7 +18,9 @@ class CreditCardTests {
     void exposesInterestRateTest() {
         final CreditCard card = newCard("0");
 
-        assertEquals(new BigDecimal("0.25"), card.interestRate());
+        assertThat(card.interestRate())
+                .as("interest rate")
+                .isEqualTo(new BigDecimal("0.25"));
     }
 
     @Test
@@ -26,8 +29,14 @@ class CreditCardTests {
 
         card.withdraw(new BigDecimal("200"));
 
-        assertEquals(new BigDecimal("300"), card.currentBalance());
-        assertEquals(BigDecimal.ZERO, card.currentDebt());
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(card.currentBalance())
+                    .as("balance")
+                    .isEqualTo(new BigDecimal("300"));
+            softly.assertThat(card.currentDebt())
+                    .as("debt")
+                    .isEqualTo(BigDecimal.ZERO);
+        });
     }
 
     @Test
@@ -36,8 +45,14 @@ class CreditCardTests {
 
         card.withdraw(new BigDecimal("250"));
 
-        assertEquals(BigDecimal.ZERO, card.currentBalance());
-        assertEquals(new BigDecimal("150"), card.currentDebt());
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(card.currentBalance())
+                    .as("balance")
+                    .isEqualTo(BigDecimal.ZERO);
+            softly.assertThat(card.currentDebt())
+                    .as("debt")
+                    .isEqualTo(new BigDecimal("150"));
+        });
     }
 
     @Test
@@ -46,8 +61,14 @@ class CreditCardTests {
 
         card.withdraw(new BigDecimal("400"));
 
-        assertEquals(BigDecimal.ZERO, card.currentBalance());
-        assertEquals(new BigDecimal("400"), card.currentDebt());
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(card.currentBalance())
+                    .as("balance")
+                    .isEqualTo(BigDecimal.ZERO);
+            softly.assertThat(card.currentDebt())
+                    .as("debt")
+                    .isEqualTo(new BigDecimal("400"));
+        });
     }
 
     @Test
@@ -57,8 +78,14 @@ class CreditCardTests {
 
         card.topUp(new BigDecimal("100"));
 
-        assertEquals(BigDecimal.ZERO, card.currentBalance());
-        assertEquals(new BigDecimal("200"), card.currentDebt());
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(card.currentBalance())
+                    .as("balance")
+                    .isEqualTo(BigDecimal.ZERO);
+            softly.assertThat(card.currentDebt())
+                    .as("debt")
+                    .isEqualTo(new BigDecimal("200"));
+        });
     }
 
     @Test
@@ -68,8 +95,14 @@ class CreditCardTests {
 
         card.topUp(new BigDecimal("300"));
 
-        assertEquals(BigDecimal.ZERO, card.currentBalance());
-        assertEquals(BigDecimal.ZERO, card.currentDebt());
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(card.currentBalance())
+                    .as("balance")
+                    .isEqualTo(BigDecimal.ZERO);
+            softly.assertThat(card.currentDebt())
+                    .as("debt")
+                    .isEqualTo(BigDecimal.ZERO);
+        });
     }
 
     @Test
@@ -79,8 +112,14 @@ class CreditCardTests {
 
         card.topUp(new BigDecimal("500"));
 
-        assertEquals(new BigDecimal("200"), card.currentBalance());
-        assertEquals(BigDecimal.ZERO, card.currentDebt());
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(card.currentBalance())
+                    .as("balance")
+                    .isEqualTo(new BigDecimal("200"));
+            softly.assertThat(card.currentDebt())
+                    .as("debt")
+                    .isEqualTo(BigDecimal.ZERO);
+        });
     }
 
     @Test
@@ -89,24 +128,26 @@ class CreditCardTests {
 
         card.topUp(new BigDecimal("50"));
 
-        assertEquals(new BigDecimal("150"), card.currentBalance());
-        assertEquals(BigDecimal.ZERO, card.currentDebt());
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(card.currentBalance())
+                    .as("balance")
+                    .isEqualTo(new BigDecimal("150"));
+            softly.assertThat(card.currentDebt())
+                    .as("debt")
+                    .isEqualTo(BigDecimal.ZERO);
+        });
     }
 
     @Test
     void negativeInterestRateIsRejectedTest() {
-        assertThrows(
-                IllegalArgumentException.class,
-                () -> new CreditCard("Bad", CurrencyCode.RUB, BigDecimal.ZERO, new BigDecimal("-0.1"))
-        );
+        assertThatThrownBy(() -> new CreditCard("Bad", CurrencyCode.RUB, BigDecimal.ZERO, new BigDecimal("-0.1")))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
     void nullInterestRateIsRejectedTest() {
-        assertThrows(
-                IllegalArgumentException.class,
-                () -> new CreditCard("Bad", CurrencyCode.RUB, BigDecimal.ZERO, null)
-        );
+        assertThatThrownBy(() -> new CreditCard("Bad", CurrencyCode.RUB, BigDecimal.ZERO, null))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
 }

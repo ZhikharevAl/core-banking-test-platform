@@ -1,9 +1,10 @@
 package org.example.banking.card;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.math.BigDecimal;
+import org.assertj.core.api.SoftAssertions;
 import org.example.banking.common.CurrencyCode;
 import org.junit.jupiter.api.Test;
 
@@ -15,7 +16,9 @@ class DebitCardTests {
 
         card.topUp(new BigDecimal("50"));
 
-        assertEquals(new BigDecimal("150"), card.currentBalance());
+        assertThat(card.currentBalance())
+                .as("balance")
+                .isEqualTo(new BigDecimal("150"));
     }
 
     @Test
@@ -24,7 +27,9 @@ class DebitCardTests {
 
         card.withdraw(new BigDecimal("40"));
 
-        assertEquals(new BigDecimal("60"), card.currentBalance());
+        assertThat(card.currentBalance())
+                .as("balance")
+                .isEqualTo(new BigDecimal("60"));
     }
 
     @Test
@@ -34,31 +39,51 @@ class DebitCardTests {
         card.topUp(BigDecimal.ZERO);
         card.withdraw(BigDecimal.ZERO);
 
-        assertEquals(new BigDecimal("100"), card.currentBalance());
+        assertThat(card.currentBalance())
+                .as("balance unchanged after zero ops")
+                .isEqualTo(new BigDecimal("100"));
     }
 
     @Test
     void negativeAmountsAreRejectedTest() {
         final DebitCard card = new DebitCard("Main", CurrencyCode.RUB, new BigDecimal("100"));
 
-        assertThrows(IllegalArgumentException.class, () -> card.topUp(new BigDecimal("-1")));
-        assertThrows(IllegalArgumentException.class, () -> card.withdraw(new BigDecimal("-1")));
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThatThrownBy(() -> card.topUp(new BigDecimal("-1")))
+                    .as("topUp negative")
+                    .isInstanceOf(IllegalArgumentException.class);
+            softly.assertThatThrownBy(() -> card.withdraw(new BigDecimal("-1")))
+                    .as("withdraw negative")
+                    .isInstanceOf(IllegalArgumentException.class);
+        });
     }
 
     @Test
     void nullAmountsAreRejectedTest() {
         final DebitCard card = new DebitCard("Main", CurrencyCode.RUB, new BigDecimal("100"));
 
-        assertThrows(IllegalArgumentException.class, () -> card.topUp(null));
-        assertThrows(IllegalArgumentException.class, () -> card.withdraw(null));
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThatThrownBy(() -> card.topUp(null))
+                    .as("topUp null")
+                    .isInstanceOf(IllegalArgumentException.class);
+            softly.assertThatThrownBy(() -> card.withdraw(null))
+                    .as("withdraw null")
+                    .isInstanceOf(IllegalArgumentException.class);
+        });
     }
 
     @Test
     void exposesNameAndCurrencyTest() {
         final DebitCard card = new DebitCard("Travel", CurrencyCode.EUR, new BigDecimal("100"));
 
-        assertEquals("Travel", card.name());
-        assertEquals(CurrencyCode.EUR, card.currency());
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(card.name())
+                    .as("name")
+                    .isEqualTo("Travel");
+            softly.assertThat(card.currency())
+                    .as("currency")
+                    .isEqualTo(CurrencyCode.EUR);
+        });
     }
 
 }
