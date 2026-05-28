@@ -42,7 +42,7 @@
 
 
 ## Запустить
-
+### Docker должен быть установлен
 ```bash
 make docker-test          # checkstyle + tests + jacoco в контейнере, результаты в ./build
 make allure-serve         # Allure UI на http://localhost:5050
@@ -52,6 +52,7 @@ make allure-serve         # Allure UI на http://localhost:5050
 
 ![Allure overview](./attachments/allure.png)
 ![Allure](./attachments/allure1.png)
+
 
 ## Стек
 
