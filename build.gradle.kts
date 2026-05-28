@@ -83,7 +83,7 @@ tasks.test {
 
     testLogging {
         events("passed", "failed", "skipped")
-        showStandardStreams = false
+        showStandardStreams = true
     }
 
     systemProperty("cucumber.junit-platform.naming-strategy", "long")
@@ -93,6 +93,47 @@ tasks.test {
     )
 
     finalizedBy(tasks.jacocoTestReport)
+}
+
+tasks.register<Test>("bankingTest") {
+    description = "Только unit-тесты банковского модуля"
+    group = "verification"
+    useJUnitPlatform()
+    testClassesDirs = sourceSets.test.get().output.classesDirs
+    classpath = sourceSets.test.get().runtimeClasspath
+    filter {
+        includeTestsMatching("org.example.banking.*")
+    }
+
+    testLogging {
+        events("passed", "failed", "skipped")
+        showStandardStreams = true
+    }
+    outputs.upToDateWhen { false }
+}
+
+tasks.register<Test>("weatherTest") {
+    description = "Только BDD-тесты Weather API (Cucumber)"
+    group = "verification"
+    useJUnitPlatform {
+        includeTags("weather")
+    }
+    testClassesDirs = sourceSets.test.get().output.classesDirs
+    classpath = sourceSets.test.get().runtimeClasspath
+
+    dependsOn("writeAllureEnvironment", "copyAllureCategories")
+    systemProperty("cucumber.junit-platform.naming-strategy", "long")
+    systemProperty(
+        "allure.results.directory",
+        layout.buildDirectory.dir("allure-results").get().asFile.absolutePath
+    )
+
+
+    testLogging {
+        events("passed", "failed", "skipped")
+        showStandardStreams = true
+    }
+    outputs.upToDateWhen { false }
 }
 
 tasks.jacocoTestReport {
