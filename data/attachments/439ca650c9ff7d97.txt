@@ -1,1 +1,0 @@
-GET http://localhost:42937/v1/current.json?key=test-api-key&q=empty-q
