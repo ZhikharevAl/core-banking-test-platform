@@ -212,7 +212,7 @@ make allure-serve           # http://localhost:5050
 
 ### Что попадает в отчёт
 
-- **Categories** (вкладка слева) - кастомные группы из `src/test/resources/allure/categories.json`. Падения раскладываются по корзинам: «Infrastructure - WireMock», «API - Serialization / mapping», «API - HTTP server error 5xx», «Cucumber - glue / step definition», «Assertion error (Bug)» и т.д. Соглашение: `failed` - реальный баг (assertion упал, прод вернул не то), `broken` - тест сломался не из-за прода (NPE, инфра не поднялась).
+- **Categories** - кастомные группы из `src/test/resources/allure/categories.json`. Падения раскладываются по корзинам: «Infrastructure - WireMock», «API - Serialization / mapping», «API - HTTP server error 5xx», «Cucumber - glue / step definition», «Assertion error (Bug)» и т.д. Соглашение: `failed` - реальный баг (assertion упал, прод вернул не то), `broken` - тест сломался не из-за прода (NPE, инфра не поднялась).
 - **Environment** (Overview) - версии Java, Gradle, Cucumber, WireMock, AssertJ, Allure, Jackson + ОС. Генерируется gradle-таской `writeAllureEnvironment` из реальных значений среды, не захардкожено.
 - **Steps + Attachments** - у каждого HTTP-вызова в дереве шагов виден полный URL запроса и pretty-printed JSON ответа.
 
