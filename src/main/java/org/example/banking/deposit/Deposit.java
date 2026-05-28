@@ -5,6 +5,7 @@ import org.example.banking.common.AbstractBankingProduct;
 import org.example.banking.common.CurrencyCode;
 
 public final class Deposit extends AbstractBankingProduct implements DepositProduct {
+
     private boolean closed;
 
     public Deposit(final String name, final CurrencyCode currency, final BigDecimal openingBalance) {
