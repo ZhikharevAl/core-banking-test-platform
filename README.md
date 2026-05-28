@@ -63,7 +63,7 @@ make clean           # очистить build/
 
 HTML-отчёт покрытия после прогона: `build/jacocoHtml/index.html`.
 
-![Coverage](./attachments/coverage.png)
+<img width="1056" height="200" alt="Screenshot 2026-05-27 111418_edited" src="https://github.com/user-attachments/assets/82872e38-68ab-4d36-b5d6-bd4629e7918b" />
 
 ### В Docker
 
@@ -84,8 +84,8 @@ make docker-clean    # снести образы и volumes
 > Если docker требует sudo, добавь себя в группу docker
 > (см. [Troubleshooting](#troubleshooting)).
 
-![Allure overview](./attachments/allure.png)
-![Allure](./attachments/allure1.png)
+<img width="1910" height="994" alt="Screenshot 2026-05-29 012530_edited" src="https://github.com/user-attachments/assets/527d197f-1fbe-473d-b9ec-99f4930c4c1a" />
+<img width="1910" height="992" alt="Screenshot 2026-05-29 013113_edited" src="https://github.com/user-attachments/assets/119e094e-c630-4b07-aa3b-3c2da7d445b5" />
 
 ## Стек
 
