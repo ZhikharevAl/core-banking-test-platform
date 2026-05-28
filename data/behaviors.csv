@@ -1,3 +1,4 @@
 "BROKEN","EPIC","FAILED","FEATURE","PASSED","SKIPPED","STORY","UNKNOWN"
-"0","","0","Current weather endpoint - error responses","1","0","Client correctly parses documented Weather API error responses","0"
-"0","","0","Current weather endpoint - happy path","1","0","Get current weather for four cities and compare values","0"
+"0","","0","Текущая погода — позитивный сценарий","1","0","Расхождения значений фиксируются в логе","0"
+"0","","0","Текущая погода — позитивный сценарий","1","0","Получение текущей погоды для четырёх городов и сравнение значений","0"
+"0","","0","Текущая погода — ответы с ошибками","1","0","Клиент корректно разбирает задокументированные ответы с ошибками","0"
