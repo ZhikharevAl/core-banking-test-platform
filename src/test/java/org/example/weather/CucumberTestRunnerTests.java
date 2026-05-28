@@ -13,7 +13,7 @@ import org.junit.platform.suite.api.Suite;
  */
 @Suite
 @IncludeEngines("cucumber")
-@SelectClasspathResource("features/weather")
+@org.junit.platform.suite.api.SelectPackages("features.weather")
 @ConfigurationParameter(key = GLUE_PROPERTY_NAME, value = "org.example.weather")
 @ConfigurationParameter(
         key = PLUGIN_PROPERTY_NAME,
