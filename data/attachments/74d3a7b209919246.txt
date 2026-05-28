@@ -1,1 +1,0 @@
-GET http://localhost:41683/v1/current.json?key=test-api-key&q=Tokyo

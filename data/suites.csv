@@ -2,8 +2,8 @@
 "  Сценарий проверяет, что клиент корректно собирает запрос к /v1/current.json,
   десериализует ответ в типизированные DTO (Location/Current/Condition)
   и читает температуру, влажность и текстовое описание погоды.
-  Все обращения идут к WireMock, внешний API не вызывается.","3548","Get current weather for four cities and compare values","","2026-05-28","passed","2026-05-28","","Current weather endpoint - happy path","Get current weather for four cities and compare values",""
+  Все обращения идут к WireMock, внешний API не вызывается.","3957","Get current weather for four cities and compare values","","2026-05-28","passed","2026-05-28","","Current weather endpoint - happy path","Get current weather for four cities and compare values",""
 "  Покрывает коды ошибок для /v1/current.json:
   - 400: 1003 (нет q), 1005 (битый URL), 1006 (город не найден)
   - 401: 1002 (нет API key), 2006 (неверный API key)
-  - 403: 2007 (квота), 2008 (ключ отключён), 2009 (нет доступа)","98","Client correctly parses documented Weather API error responses","","2026-05-28","passed","2026-05-28","","Current weather endpoint - error responses","Client correctly parses documented Weather API error responses",""
+  - 403: 2007 (квота), 2008 (ключ отключён), 2009 (нет доступа)","82","Client correctly parses documented Weather API error responses","","2026-05-28","passed","2026-05-28","","Current weather endpoint - error responses","Client correctly parses documented Weather API error responses",""
