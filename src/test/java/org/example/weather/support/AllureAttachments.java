@@ -27,11 +27,6 @@ public final class AllureAttachments {
         Allure.addAttachment("Response", "application/json", content, ".json");
     }
 
-    public static void attachCall(final ApiCallResult result) {
-        attachRequest(result.url());
-        attachResponse(result.response());
-    }
-
     private static String prettyJson(final String raw) {
         if (raw == null || raw.isBlank()) {
             return "";
