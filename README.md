@@ -21,38 +21,71 @@
 
 ## Оглавление
 
-- [Запустить](#запустить)
+- [Запуск](#запуск)
+    - [По модулям (нужен только JDK 21)](#по-модулям-нужен-только-jdk-21)
+    - [Через Makefile](#через-makefile)
+    - [В Docker](#в-docker)
 - [Стек](#стек)
 - [Архитектура](#архитектура)
-    - [Task 1: Банковские продукты](#task-1---банковские-продукты-srcmainjavabanking)
-    - [Task 2: Weather API tests](#task-2---weather-api-tests-srctestjavaweather)
-- [Запуск](#запуск)
-    - [Локально через Makefile](#локально-через-makefile)
-    - [В Docker](#в-docker)
+    - [Task 1: Банковские продукты](#task-1--банковские-продукты)
+    - [Task 2: Weather API tests](#task-2--weather-api-tests)
 - [Allure](#allure)
-    - [Локально](#локально)
-    - [Что попадает в отчёт](#что-попадает-в-отчёт)
-    - [Публикация в CI](#публикация-в-ci)
 - [Тесты](#тесты)
-    - [Структура](#структура)
-    - [Покрытие Weather API](#покрытие-weather-api)
 - [CI](#ci)
 - [pre-commit](#pre-commit)
+- [Troubleshooting](#troubleshooting)
 
+## Запуск
 
+### По модулям (нужен только JDK 21)
 
-## Запустить
-### Docker должен быть установлен
+Самый быстрый путь - Docker не нужен, Gradle Wrapper сам подтянет всё необходимое.
+
 ```bash
-make docker-test          # checkstyle + tests + jacoco в контейнере, результаты в ./build
-make allure-serve         # Allure UI на http://localhost:5050
+./gradlew bankingTest    # только банковские unit-тесты
+./gradlew weatherTest    # только Weather API (Cucumber + WireMock)
+./gradlew test           # всё вместе
 ```
 
-Открой `http://localhost:5050/allure-docker-service/latest-report` - увидишь полный отчёт с двумя Cucumber-сценариями, environment и categories.
+### Через Makefile
+
+```bash
+make help            # список всех команд
+make test            # все тесты
+make test-banking    # только банковские unit-тесты
+make test-weather    # только BDD Weather API
+make check           # только Checkstyle
+make coverage        # тесты + HTML-отчёт JaCoCo
+make open-coverage   # то же + открыть отчёт в браузере
+make ci              # checkstyle + tests + coverage (= что делает CI)
+make clean           # очистить build/
+```
+
+HTML-отчёт покрытия после прогона: `build/jacocoHtml/index.html`.
+
+![Coverage](./attachments/coverage.png)
+
+### В Docker
+
+Изолированный прогон без локального JDK/Gradle. Docker **опционален** - если его нет, используй варианты выше.
+
+```bash
+make docker-test     # checkstyle + test + jacoco в контейнере, артефакты в ./build
+make allure-serve    # Allure UI на http://localhost:5050
+make docker-allure   # обе команды разом
+make docker-down     # погасить allure-сервис
+make docker-clean    # снести образы и volumes
+```
+
+Отчёт: `http://localhost:5050/allure-docker-service/latest-report`.
+
+> **Важно:** не запускай `make docker-test` под `sudo` иначе артефакты в `./build`
+> создадутся от root, и потом локальный Gradle/pre-commit не сможет их удалить.
+> Если docker требует sudo, добавь себя в группу docker
+> (см. [Troubleshooting](#troubleshooting)).
 
 ![Allure overview](./attachments/allure.png)
 ![Allure](./attachments/allure1.png)
-
 
 ## Стек
 
@@ -72,7 +105,9 @@ make allure-serve         # Allure UI на http://localhost:5050
 
 ## Архитектура
 
-### Task 1 - Банковские продукты (`src/main/java/.../banking`)
+### Task 1 - Банковские продукты
+
+Расположение: `src/main/java/org/example/banking/`.
 
 ```
 common/
@@ -99,14 +134,14 @@ deposit/
 - **Расширяемость без правок.** Новый тип карты - наследник `AbstractCardProduct`. Новый тип вклада - реализация `DepositProduct`. Новая категория продукта (кредит наличными, инвестпродукт) - новый интерфейс рядом, наследующий `BankingProduct`.
 - **Бизнес-правила в специализациях, а не в базе.** Запрет RUB у валютной карты живёт в `ForeignCurrencyDebitCard`. Логика долга - только в `CreditCard`.
 
-### Task 2 - Weather API tests (`src/test/java/.../weather`)
+### Task 2 - Weather API tests
 
-Слоёная архитектура - каждый слой делает одну вещь, ни один не знает деталей соседнего:
+Расположение: `src/test/java/org/example/weather/`. Слоёная архитектура - каждый слой делает одну вещь, ни один не знает деталей соседнего:
 
 ```
 api/                              транспорт + контракт
   WeatherApiClient                тонкий HTTP-клиент над JDK HttpClient
-  WeatherEndpoint                 enum путей API (CURRENT/FORECAST/...)
+  WeatherEndpoint                 enum путей API
   CurrentWeatherRequest           record-DTO запроса
   ApiCallResult                   обёртка над HttpResponse + URL
   WeatherResponseParser           изолированный Jackson-парсер (snake_case)
@@ -135,7 +170,7 @@ support/
   WeatherTestContext              состояние сценария (LinkedHashMap)
 
 steps/                            тонкие Cucumber step definitions
-  CurrentWeatherSteps             happy path
+  CurrentWeatherSteps             happy path + сценарий расхождений
   WeatherErrorSteps               400/401/403
 
 config/
@@ -144,141 +179,61 @@ config/
 CucumberTestRunnerTests           JUnit Platform suite
 ```
 
-**Архитектура:**
+**Особенности архитектуры:**
 
 - **Степы не знают про HTTP, WireMock и JSON.** В `CurrentWeatherSteps`/`WeatherErrorSteps` нет ни одного `import java.net.http.*` или `ObjectMapper`. Только оркестрация: фикстура → стаб → клиент → DTO → AssertJ.
-- **DI между шагами через `cucumber-picocontainer`.** `WireMockServerHolder`, `WeatherApiClient`, `WeatherStubs`, `WeatherTestContext`, `DataTableTypes` создаются один раз на сценарий и шарятся между хуками и степами без статиков и singleton-ов.
-- **Парсинг DataTable идиоматичный.** `DataTableTypes` через `@DataTableType` превращает строки таблиц в типизированные records (`CurrentWeatherFixture`, `ApiErrorFixture`, `ErrorRequestCase`, `ExpectedApiError`). Степы получают `List<Fixture>` напрямую, без `Map<String, String>` и ручного парсинга.
-- **Типизированные DTO вместо `JsonNode`.** `record CurrentWeatherResponse(Location location, Current current)` - компилятор ловит опечатки, рефакторинг безопасный. snake_case JSON маппится через `PropertyNamingStrategies.SNAKE_CASE` в одной точке (`WeatherResponseParser`).
-- **Stubы декларативны.** Шаги передают `CurrentWeatherFixture` / `ApiErrorFixture`, а `WeatherStubs` знает, как из этого собрать WireMock-mapping. Формат стаба меняется в одном месте.
-- **Soft assertions через AssertJ.** Все проверки в Then-шагах собираются в одной `SoftAssertions.assertSoftly(...)` - если упало tempC у Москвы и humidity у Парижа, в отчёте увидишь оба фейла, а не только первый.
-- **Расхождения параллельно летят в stdout.** `Mismatches.report(key, field, expected, actual)` пишет `WARN [Moscow] tempC mismatch: expected=17.5, actual=21.0` в лог - это требование ТЗ продублировано рядом с Allure-проверками.
-- **Allure-аттачменты автоматические.** `WeatherApiClient` дёргает `AllureAttachments.attachRequest/Response` в одну точку - в отчёте видно реальный URL и тело ответа без ручного логирования из степов.
-- **Расширяемость.**
-
-
-Существующие классы не трогаются.
-
-## Запуск
-
-### Локально через Makefile
-
-```bash
-make help            # все доступные команды
-make ci              # checkstyle + tests + coverage (= что делает CI)
-make test            # только тесты
-make check           # только checkstyle
-make coverage        # тесты + HTML-отчёт JaCoCo
-make open-coverage   # то же + открыть отчёт в браузере
-make clean           # очистить build/
-```
-
-Напрямую через Gradle:
-
-```bash
-./gradlew test
-./gradlew checkstyleMain checkstyleTest
-./gradlew test jacocoTestReport
-```
-
-HTML-отчёт покрытия после прогона: `build/jacocoHtml/index.html`.
-
-![Coverage](./attachments/coverage.png)
-
-### В Docker
-
-Полный набор проверок изолированно, без локального JDK/Gradle:
-
-```bash
-make docker-test     # checkstyle + test + jacoco внутри контейнера, артефакты в ./build
-make allure-serve    # поднять Allure UI на http://localhost:5050
-make docker-allure   # обе предыдущие команды одной
-make docker-down     # погасить allure-сервис
-make docker-clean    # снести образы и volumes
-```
-
-**`Dockerfile`** - один stage поверх `gradle:8.7-jdk21`. Кэш Gradle живёт не в образе, а в named volume `gradle-cache` (см. `docker-compose.yaml`) - первый прогон скачает зависимости, последующие переиспользуют.
-
-**`docker-compose.yaml`**:
-
-- `tests` - собирает образ и прогоняет CI-набор от `${HOST_UID}:${HOST_GID}` (чтобы `./build/` оставался под твоим пользователем, без root-овых файлов). Лимиты: 2 GB / 2 CPU.
-- `allure` - `frankescobar/allure-docker-service:2.27.0` на `:5050`. Слушает `./build/allure-results`, автогенерация каждые 3 секунды (`CHECK_RESULTS_EVERY_SECONDS: "3"`). Healthcheck по `/allure-docker-service/version`. Лимиты: 512 MB / 0.5 CPU. История прогонов в named volume `allure-history`.
-
-В `Makefile` цель `docker-test` пробрасывает `HOST_UID`/`HOST_GID` автоматически:
-
-```makefile
-docker-test:
-	HOST_UID=$(shell id -u) HOST_GID=$(shell id -g) $(COMPOSE) run --rm --build tests
-```
+- **DI между шагами через `cucumber-picocontainer`.** `WireMockServerHolder`, `WeatherApiClient`, `WeatherStubs`, `WeatherTestContext`, `DataTableTypes` создаются один раз на сценарий и шарятся между хуками и степами без статиков.
+- **Парсинг DataTable идиоматичный.** `DataTableTypes` через `@DataTableType` превращает строки таблиц в типизированные records. Степы получают `List<Fixture>` напрямую, без `Map<String, String>`.
+- **Типизированные DTO вместо `JsonNode`.** snake_case JSON маппится через `PropertyNamingStrategies.SNAKE_CASE` в одной точке (`WeatherResponseParser`).
+- **Stubы декларативны.** Шаги передают фикстуру, `WeatherStubs` знает, как из неё собрать WireMock-mapping. Формат стаба меняется в одном месте.
+- **Soft assertions через AssertJ.** Все проверки в Then-шагах в одной `SoftAssertions.assertSoftly(...)` - видно все фейлы сразу, а не первый.
+- **Расхождения летят в stdout.** `Mismatches.report(key, field, expected, actual)` пишет `WARN [Moscow] tempC mismatch: expected=20.0, actual=17.5` - требование ТЗ продублировано рядом с Allure-проверками. Отдельный сценарий «Расхождения значений фиксируются в логе» демонстрирует это.
+- **Allure-аттачменты автоматические.** `WeatherApiClient` дёргает `AllureAttachments` в одну точку в отчёте виден реальный URL и тело ответа.
 
 ## Allure
 
-### Локально
+Локально:
 
 ```bash
 make docker-test            # генерирует build/allure-results
 make allure-serve           # http://localhost:5050
 ```
 
-Поскольку `CHECK_RESULTS_EVERY_SECONDS: "3"`, после каждого нового прогона достаточно обновить страницу - сервис подхватит свежие результаты сам.
+Поскольку `CHECK_RESULTS_EVERY_SECONDS: "3"`, после каждого нового прогона достаточно обновить страницу.
 
-### Что попадает в отчёт
+**Что попадает в отчёт:**
 
-- **Categories** - кастомные группы из `src/test/resources/allure/categories.json`. Падения раскладываются по корзинам: «Infrastructure - WireMock», «API - Serialization / mapping», «API - HTTP server error 5xx», «Cucumber - glue / step definition», «Assertion error (Bug)» и т.д. Соглашение: `failed` - реальный баг (assertion упал, прод вернул не то), `broken` - тест сломался не из-за прода (NPE, инфра не поднялась).
-- **Environment** (Overview) - версии Java, Gradle, Cucumber, WireMock, AssertJ, Allure, Jackson + ОС. Генерируется gradle-таской `writeAllureEnvironment` из реальных значений среды, не захардкожено.
-- **Steps + Attachments** - у каждого HTTP-вызова в дереве шагов виден полный URL запроса и pretty-printed JSON ответа.
+- **Categories** - кастомные группы из `src/test/resources/allure/categories.json` (Infrastructure / API / Cucumber / Assertion error). Соглашение: `failed` - реальный баг, `broken` - тест сломался не из-за прода (NPE, инфра).
+- **Environment** - версии Java, Gradle, Cucumber, WireMock, AssertJ, Allure, Jackson + ОС. Генерируется gradle-таской `writeAllureEnvironment` из реальной среды.
+- **Steps + Attachments** - у каждого HTTP-вызова виден URL запроса и pretty-printed JSON ответа.
 
-### Публикация в CI
-
-`.github/workflows/ci.yml` имеет два job-а:
-
-1. **`build`** - checkstyle + tests + jacoco, кладёт `allure-results` и `jacoco-html` как артефакты.
-2. **`publish-allure-report`** - только из `main`, запускается даже при упавших тестах (`success() || failure()` - иначе не увидишь, что именно сломалось). Скачивает артефакт, ставит Allure CLI с официального GitHub Release, мержит с историей трендов из ветки `gh-pages`, генерирует свежий отчёт и публикует через `peaceiris/actions-gh-pages`.
-
-**Что нужно настроить один раз вручную в GitHub:**
-
-- Settings → Pages → Source: **Deploy from a branch**, ветка `gh-pages`, root `/`.
-- Settings → Actions → General → Workflow permissions: **Read and write**.
-
-После первого успешного прогона отчёт будет доступен по адресу:
-`https://ZhikharevAl.github.io/core-banking-test-platform/`.
+**Публикация в CI:** job `publish-allure-report` (только из `main`, при `success() || failure()`) ставит Allure CLI, мержит историю трендов из `gh-pages` и публикует через `peaceiris/actions-gh-pages`. Один раз настроить в GitHub: Settings → Pages → ветка `gh-pages` root `/`; Settings → Actions → Workflow permissions → **Read and write**. Отчёт: `https://ZhikharevAl.github.io/core-banking-test-platform/`.
 
 ## Тесты
-
-### Структура
 
 ```
 src/test/java/org/example/banking/
   BankingProductArchitectureTests.java          архитектурные проверки полиморфизма
-  card/
-    DebitCardTests.java
-    ForeignCurrencyDebitCardTests.java
-    CreditCardTests.java
-  common/
-    AbstractBankingProductValidationTests.java  валидация конструктора и операций базы
-  deposit/
-    DepositTests.java
+  card/    DebitCardTests, ForeignCurrencyDebitCardTests, CreditCardTests
+  common/  AbstractBankingProductValidationTests
+  deposit/ DepositTests
 
 src/test/java/org/example/weather/
   CucumberTestRunnerTests.java                  JUnit Platform suite
-  api/                                          транспорт и контракт
-  model/                                        DTO ответа
-  wiremock/                                     стаб-инфраструктура
-  hooks/ steps/ support/ fixtures/ config/
+  api/ model/ wiremock/ hooks/ steps/ support/ fixtures/ config/
 
 src/test/resources/
-  allure/
-    categories.json                             кастомные группы для отчёта
+  allure/categories.json                        кастомные группы для отчёта
   features/weather/
-    current_weather.feature                     позитив (4 города)
-    weather_error.feature                       400/401/403 - все 8 кодов из swagger
+    current_weather.feature                     позитив (4 города) + расхождения
+    weather_error.feature                       400/401/403 — все 8 кодов из swagger
 ```
 
-### Покрытие Weather API
+**Покрытие Weather API:**
 
 | Status | Code | Что проверяется                                |
 |--------|------|------------------------------------------------|
-| 200    | -    | success: location + current                    |
+| 200    | —    | success: location + current                    |
 | 400    | 1003 | Parameter 'q' not provided                     |
 | 400    | 1005 | API request url is invalid                     |
 | 400    | 1006 | No location found matching parameter 'q'       |
@@ -288,18 +243,15 @@ src/test/resources/
 | 403    | 2008 | API key has been disabled                      |
 | 403    | 2009 | API key does not have access to the resource   |
 
-ТЗ требовало 4 кода ошибок на выбор - покрыты **все 8 задокументированных**.
-
 ## CI
 
 `.github/workflows/ci.yml`:
 
 - Гоняет Checkstyle и тесты на каждом push + по ручному запуску (`workflow_dispatch`).
-- Кэширует Gradle через `gradle/actions/setup-gradle` - feature-ветки на read-only кэше, чтобы не размывать общий.
+- Кэширует Gradle через `gradle/actions/setup-gradle` — feature-ветки на read-only кэше.
 - `concurrency` отменяет устаревшие запуски при пуше в ту же ветку.
-- Складывает HTML-отчёт JaCoCo и `allure-results` как артефакты (доступны на вкладке Actions у запуска).
-- На фейле дополнительно сохраняет отчёты Checkstyle и тестов.
-- Из `main` ставит Allure CLI с GitHub Release и публикует отчёт с трендами на GitHub Pages.
+- Складывает JaCoCo HTML и `allure-results` как артефакты; на фейле - отчёты Checkstyle и тестов.
+- Из `main` публикует Allure-отчёт с трендами на GitHub Pages.
 
 ## pre-commit
 
@@ -308,11 +260,73 @@ make precommit-install
 make precommit-run
 ```
 
-**Хуки:**
+**Хуки:** trailing whitespace, EOF newline, YAML/XML/JSON sanity-check, mixed line endings, check-added-large-files (1 MB), check-merge-conflict, detect-secrets, `gradle checkstyleMain checkstyleTest`, `gradle test`.
 
-- trailing whitespace, EOF newline, YAML/XML/JSON sanity-check, mixed line endings
-- check-added-large-files (порог 1 MB)
-- check-merge-conflict
-- detect-secrets - ловит случайные ключи/токены в коммитах
-- `gradle checkstyleMain checkstyleTest` - те же правила, что в CI
-- `gradle test` - полный прогон перед коммитом
+> pre-commit проверяет **застейдженные** файлы. После правки делай `git add`, потом `git commit` - иначе хук гоняет старую версию из индекса.
+
+## Troubleshooting
+
+**`docker` требует `sudo`.**
+Пользователь не в группе `docker`. Запускать сборку под sudo нельзя - `HOST_UID` станет 0, и `./build/` заполнится root-овыми файлами. Добавь себя в группу и перелогинься (в WSL - `wsl --shutdown`, иначе группа не подхватится):
+
+```bash
+sudo usermod -aG docker $USER
+newgrp docker        # или полный релогин; в WSL - wsl --shutdown из PowerShell
+docker ps            # должно работать без sudo
+```
+
+**После `sudo`-прогона сломались локальные команды (`make test`, `make test-banking`, pre-commit) - `Permission denied`.**
+Под sudo Gradle/Docker создали в `build/` и `.gradle/` файлы от root, обычный пользователь их не перезапишет. Снеси обе папки и пересоздай обычным прогоном:
+
+```bash
+sudo rm -rf build .gradle
+make test-banking      # пересоздаст всё под твоим пользователем
+```
+
+**Docker: `java.io.IOException: Permission denied` в `GradleUserHomeScopeFileTimeStampInspector` / `~/.gradle`.**
+Named volume `gradle-cache` был создан под другим UID:GID, чем тот, под которым сейчас бежит контейнер. Частая причина - твой **GID не 1000, а 1001** (проверь `id -g`), а в старом образе/волюме зашит `1000:1000`. Лечится сносом volume и пересборкой с актуальными ARG:
+
+```bash
+docker compose down -v          # -v обязателен: сносит gradle-cache
+sudo rm -rf build .gradle
+docker compose build --no-cache tests
+make docker-test
+```
+
+`Dockerfile` принимает `ARG HOST_UID/HOST_GID`, а `docker-compose.yaml` пробрасывает их и в `build.args`, и в `user:` - поэтому владелец файлов в образе, runtime-пользователь и volume совпадают по UID:GID.
+
+**Docker: `Failed to create parent directory '/workspace/build/classes'`.**
+Папка `./build` отсутствовала на хосте (например, после `sudo rm -rf build`), docker создал точку bind-mount `./build` от root, и контейнер под `1000:100x` не может в неё писать. Цель `docker-test` в `Makefile` предсоздаёт папку под твоим пользователем до запуска:
+
+```makefile
+docker-test:
+	@mkdir -p build
+	HOST_UID=$(shell id -u) HOST_GID=$(shell id -g) $(COMPOSE) run --rm --build tests
+```
+
+Если ошибка уже случилась: `sudo rm -rf build` → `make docker-test` (создаст `build/` под тобой). После прогона `ls -la build/` должен показывать твоего пользователя как владельца.
+
+**Полный ритуал восстановления Docker (когда права запутались окончательно).**
+
+```bash
+docker compose down -v
+sudo rm -rf build .gradle
+docker compose build --no-cache tests
+make docker-test
+ls -la build/        # владелец твой пользователь, не root
+```
+
+**Allure UI на `:5050` пустой / `Unknown` / 0 test cases.**
+Папка `build/allure-results` пустая или сервис поднялся раньше прогона. Порядок: сначала `make docker-test`, потом `make allure-serve`. Если allure уже висит `docker compose restart allure`.
+
+**`make docker-test` не подхватывает свежий код.**
+`docker compose run` использует закешированный образ. Цель `docker-test` уже содержит `--build`, но при сомнениях - `docker compose build tests` вручную.
+
+**`gradle test` показывает `UP-TO-DATE` и не перезапускается.**
+Кэш Gradle. Цели `test`/`bankingTest`/`weatherTest` сбрасывают его через `outputs.upToDateWhen { false }`; разово можно `./gradlew test --rerun-tasks`.
+
+**`SLF4J: No providers were found` в начале прогона.**
+Информационное предупреждение от первого сценария до инициализации `slf4j-simple`. На результат и на WARN-логи расхождений не влияет.
+
+**`workflow_dispatch` не показывает кнопку «Run workflow».**
+Кнопка появляется, только когда `ci.yml` есть в default-ветке (`main`). Влей ветку или запушь yml в main.

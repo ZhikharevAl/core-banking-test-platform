@@ -3,6 +3,9 @@ services:
   tests:
     build:
       context: .
+      args:
+        HOST_UID: "${HOST_UID:-1000}"
+        HOST_GID: "${HOST_GID:-1000}"
     image: core-banking-test-platform:tests
     user: "${HOST_UID:-1000}:${HOST_GID:-1000}"
     environment:

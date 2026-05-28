@@ -2,8 +2,9 @@ GRADLE := ./gradlew
 GRADLE_FLAGS := --no-daemon --stacktrace
 COMPOSE := docker compose
 
-.PHONY: help build test check coverage open-coverage clean ci precommit-install precommit-run \
-        allure-serve allure-clean docker-test docker-allure docker-down docker-clean
+.PHONY: help build test test-banking test-weather check coverage open-coverage clean ci \
+        precommit-install precommit-run allure-serve allure-clean ensure-build-dirs \
+        docker-test docker-allure docker-down docker-clean
 
 help: ## Показать список команд
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
@@ -13,13 +14,19 @@ build: ## Скомпилировать проект (без тестов)
 	$(GRADLE) build -x test $(GRADLE_FLAGS)
 
 test: ## Прогнать тесты
-	$(GRADLE) test $(GRADLE_FLAGS)
+	$(GRADLE) clean test $(GRADLE_FLAGS)
+
+test-banking: ## Только unit-тесты банковского модуля
+	$(GRADLE) clean bankingTest $(GRADLE_FLAGS)
+
+test-weather: ## Только BDD-тесты Weather API
+	$(GRADLE) clean weatherTest $(GRADLE_FLAGS)
 
 check: ## Запустить Checkstyle
 	$(GRADLE) checkstyleMain checkstyleTest $(GRADLE_FLAGS)
 
 coverage: ## Тесты + HTML-отчёт покрытия
-	$(GRADLE) test jacocoTestReport $(GRADLE_FLAGS)
+	$(GRADLE) clean test jacocoTestReport $(GRADLE_FLAGS)
 	@echo ""
 	@echo "HTML отчёт: build/jacocoHtml/index.html"
 
@@ -34,7 +41,7 @@ clean: ## Очистить артефакты сборки
 	$(GRADLE) clean $(GRADLE_FLAGS)
 
 
-allure-serve: ## Поднять Allure UI локально на http://localhost:5050
+allure-serve: ensure-build-dirs ## Поднять Allure UI локально на http://localhost:5050
 	$(COMPOSE) up -d allure
 	@echo "Allure UI: http://localhost:5050"
 
@@ -43,9 +50,13 @@ allure-clean: ## Очистить allure-results
 
 
 docker-test: ## Прогнать CI-набор в Docker (checkstyle + test + jacoco)
+	@mkdir -p build
 	HOST_UID=$(shell id -u) HOST_GID=$(shell id -g) $(COMPOSE) run --rm --build tests
 
 docker-allure: docker-test allure-serve ## Тесты в Docker + Allure UI
+
+ensure-build-dirs: ## Создать build/allure-results под текущим пользователем
+	@mkdir -p build/allure-results
 
 docker-down: ## Погасить compose-стек
 	$(COMPOSE) down

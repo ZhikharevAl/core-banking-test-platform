@@ -20,11 +20,4 @@ public record CurrentWeatherRequest(String apiKey, String city, String lang) {
         return new CurrentWeatherRequest(WeatherTestConfig.API_KEY, city, null);
     }
 
-    /**
-     * Запрос с явным ключом — для негативных сценариев.
-     */
-    public static CurrentWeatherRequest forCityWithKey(final String city, final String apiKey) {
-        return new CurrentWeatherRequest(apiKey, city, null);
-    }
-
 }
