@@ -39,8 +39,6 @@
 
 ### По модулям (нужен только JDK 21)
 
-Самый быстрый путь - Docker не нужен, Gradle Wrapper сам подтянет всё необходимое.
-
 ```bash
 ./gradlew bankingTest    # только банковские unit-тесты
 ./gradlew weatherTest    # только Weather API (Cucumber + WireMock)
